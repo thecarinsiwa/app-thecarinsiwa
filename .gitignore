@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build
+client/.next/
+server/dist/
+*.tsbuildinfo
+
+# Env (do not commit secrets)
+client/.env.local
+server/.env
+.env
+.env.*
+!.env.example
+
+# Logs & cache
+npm-debug.log*
+*.log
+.cache/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
+
+# MySQL data (if local)
+data/

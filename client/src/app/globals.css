@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent: #1a4d3e;
+  --accent-light: #2d6a4f;
+  --bg: #fafafa;
+  --text: #1a1a1a;
+  --text-muted: #64748b;
+}
+
+.dark {
+  --accent: #2d6a4f;
+  --accent-light: #40916c;
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-[var(--bg)] text-[var(--text)] antialiased transition-colors duration-300;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
