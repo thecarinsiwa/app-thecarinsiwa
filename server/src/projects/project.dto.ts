@@ -8,7 +8,7 @@ export class CreateProjectDto {
   description: string;
 
   @IsString()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   imageUrl: string;
 
   @IsArray()
@@ -16,11 +16,11 @@ export class CreateProjectDto {
   techStack: string[];
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   githubUrl?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   liveUrl?: string;
 
   @IsOptional()
@@ -38,7 +38,7 @@ export class UpdateProjectDto {
   description?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   imageUrl?: string;
 
   @IsOptional()
@@ -47,11 +47,11 @@ export class UpdateProjectDto {
   techStack?: string[];
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   githubUrl?: string | null;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   liveUrl?: string | null;
 
   @IsOptional()

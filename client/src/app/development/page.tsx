@@ -7,36 +7,27 @@ export const metadata: Metadata = {
   description: 'Web and software development projects by Carin Siwa.',
 };
 
-// Replace with API fetch later
 async function getProjects(): Promise<ProjectCardData[]> {
-  return [
-    {
-      id: '1',
-      title: 'E-Commerce Platform',
-      description: 'Full-stack online store with cart, checkout, and admin dashboard.',
-      imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop',
-      techStack: ['Next.js', 'NestJS', 'MySQL'],
-      githubUrl: 'https://github.com',
-      liveUrl: 'https://example.com',
-    },
-    {
-      id: '2',
-      title: 'Portfolio CMS',
-      description: 'Headless CMS and API for portfolios and blogs.',
-      imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop',
-      techStack: ['React', 'Node.js', 'PostgreSQL'],
-      githubUrl: 'https://github.com',
-    },
-    {
-      id: '3',
-      title: 'Wildlife Gallery App',
-      description: 'Photo and video gallery with filters and lightbox.',
-      imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=450&fit=crop',
-      techStack: ['Next.js', 'TypeScript'],
-      githubUrl: 'https://github.com',
-      liveUrl: 'https://example.com',
-    },
-  ];
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  try {
+    const res = await fetch(`${baseUrl}/projects`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data)
+      ? data.map((p: { id: string; title: string; description: string; imageUrl: string; techStack: string[]; githubUrl?: string | null; liveUrl?: string | null; featured?: boolean }) => ({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          imageUrl: p.imageUrl,
+          techStack: Array.isArray(p.techStack) ? p.techStack : [],
+          githubUrl: p.githubUrl ?? null,
+          liveUrl: p.liveUrl ?? null,
+          featured: p.featured,
+        }))
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 export default async function DevelopmentPage() {
@@ -50,11 +41,15 @@ export default async function DevelopmentPage() {
       <p className="mt-2 text-slate-600 dark:text-slate-300">
         Web and software projects I&apos;ve built.
       </p>
-      <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project, index) => (
-          <ProjectCard key={project.id} project={project} index={index} />
-        ))}
-      </div>
+      {projects.length === 0 ? (
+        <p className="mt-10 text-slate-500 dark:text-slate-400">Aucun projet pour le moment.</p>
+      ) : (
+        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

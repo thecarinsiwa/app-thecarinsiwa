@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -31,7 +31,9 @@ export default function AdminProjectsPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -61,6 +63,43 @@ export default function AdminProjectsPage() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) {
+      showMessage('error', 'Veuillez choisir une image (JPG, PNG, GIF, WebP).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showMessage('error', 'L’image ne doit pas dépasser 5 Mo.');
+      return;
+    }
+    setUploadingImage(true);
+    setMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${API}/projects/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showMessage('error', data.message || 'Échec de l’upload.');
+        return;
+      }
+      if (data.url) {
+        setForm((f) => ({ ...f, imageUrl: data.url }));
+        showMessage('success', 'Image envoyée. Vous pouvez enregistrer le projet.');
+      }
+    } catch {
+      showMessage('error', 'Erreur lors de l’envoi du fichier.');
+    } finally {
+      setUploadingImage(false);
+      e.target.value = '';
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -168,14 +207,45 @@ export default function AdminProjectsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">URL de l’image *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Image *</label>
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+              >
+                {uploadingImage ? 'Envoi en cours...' : 'Choisir un fichier'}
+              </button>
+              <span className="text-sm text-slate-500 dark:text-slate-400">ou coller une URL ci-dessous</span>
+            </div>
             <input
-              required
               type="url"
+              required
               value={form.imageUrl}
               onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              placeholder="https://... ou uploadez un fichier ci-dessus"
+              className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
             />
+            {form.imageUrl && (
+              <div className="mt-2">
+                <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">Aperçu</p>
+                <img
+                  src={form.imageUrl}
+                  alt=""
+                  className="h-24 w-auto max-w-full rounded-lg border border-slate-200 object-contain dark:border-slate-600"
+                  onError={() => setForm((f) => ({ ...f, imageUrl: '' }))}
+                />
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Tech stack (séparer par des virgules)</label>
