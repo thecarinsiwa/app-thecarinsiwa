@@ -4,39 +4,11 @@ import Link from 'next/link';
 import { ProjectCard } from '@/components/development/ProjectCard';
 import type { ProjectCardData } from '@/components/development/ProjectCard.types';
 
-// Example data – replace with API later
-const featuredProjects: ProjectCardData[] = [
-  {
-    id: '1',
-    title: 'E-Commerce Platform',
-    description: 'Full-stack online store with cart, checkout, and admin dashboard.',
-    imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop',
-    techStack: ['Next.js', 'NestJS', 'MySQL'],
-    githubUrl: 'https://github.com',
-    liveUrl: 'https://example.com',
-    featured: true,
-  },
-  {
-    id: '2',
-    title: 'Portfolio CMS',
-    description: 'Headless CMS and API for portfolios and blogs.',
-    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop',
-    techStack: ['React', 'Node.js', 'PostgreSQL'],
-    githubUrl: 'https://github.com',
-    featured: true,
-  },
-  {
-    id: '3',
-    title: 'Wildlife Gallery App',
-    description: 'Photo and video gallery with filters and lightbox.',
-    imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=450&fit=crop',
-    techStack: ['Next.js', 'TypeScript'],
-    githubUrl: 'https://github.com',
-    featured: true,
-  },
-];
+interface FeaturedProjectsSectionProps {
+  projects: ProjectCardData[];
+}
 
-export function FeaturedProjectsSection() {
+export function FeaturedProjectsSection({ projects }: FeaturedProjectsSectionProps) {
   return (
     <section id="projects" className="border-t border-slate-200 bg-slate-50/50 py-16 dark:border-slate-700 dark:bg-slate-900/50 md:py-24">
       <div className="mx-auto max-w-6xl px-4 md:px-6">
@@ -51,11 +23,15 @@ export function FeaturedProjectsSection() {
             View all →
           </Link>
         </div>
-        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredProjects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
-          ))}
-        </div>
+        {projects.length === 0 ? (
+          <p className="mt-10 text-slate-500 dark:text-slate-400">Aucun projet mis en avant pour le moment.</p>
+        ) : (
+          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project, index) => (
+              <ProjectCard key={project.id} project={project} index={index} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
