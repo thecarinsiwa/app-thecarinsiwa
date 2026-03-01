@@ -5,6 +5,11 @@ import { FeaturedProjectsSection } from '@/components/home/FeaturedProjectsSecti
 import { ContactCTA } from '@/components/home/ContactCTA';
 import type { ProjectCardData } from '@/components/development/ProjectCard.types';
 
+interface SocialLink {
+  label: string;
+  href: string;
+}
+
 async function getFeaturedProjects(): Promise<ProjectCardData[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   try {
@@ -28,12 +33,27 @@ async function getFeaturedProjects(): Promise<ProjectCardData[]> {
   }
 }
 
+async function getSocialLinks(): Promise<SocialLink[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  try {
+    const res = await fetch(`${baseUrl}/settings`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data?.socialLinks) ? data.socialLinks : [];
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage() {
-  const featuredProjects = await getFeaturedProjects();
+  const [featuredProjects, socialLinks] = await Promise.all([
+    getFeaturedProjects(),
+    getSocialLinks(),
+  ]);
 
   return (
     <>
-      <Hero />
+      <Hero socialLinks={socialLinks} />
       <AboutSection />
       <SkillsSection />
       <FeaturedProjectsSection projects={featuredProjects} />
