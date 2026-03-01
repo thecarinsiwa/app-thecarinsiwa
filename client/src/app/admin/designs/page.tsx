@@ -4,15 +4,20 @@ import { useState, useEffect, useRef } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const CATEGORIES = ['Branding', 'Social Media', 'Print', 'UI'] as const;
+type DesignCategory = (typeof CATEGORIES)[number];
 
 interface Design {
   id: string;
   title: string;
   imageUrl: string;
-  category: string;
+  category: DesignCategory;
 }
 
-const emptyForm = { title: '', imageUrl: '', category: 'Branding' as const };
+const emptyForm: { title: string; imageUrl: string; category: DesignCategory } = {
+  title: '',
+  imageUrl: '',
+  category: 'Branding',
+};
 
 export default function AdminDesignsPage() {
   const [designs, setDesigns] = useState<Design[]>([]);

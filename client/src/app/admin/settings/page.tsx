@@ -74,8 +74,8 @@ export default function AdminSettingsPage() {
     try {
       const body = {
         socialLinks: settings.socialLinks.filter((l) => l.label.trim() && l.href.trim()),
-        contactSubtitle: settings.contactSubtitle.trim() || null,
-        contactEmail: settings.contactEmail.trim() || null,
+        contactSubtitle: (settings.contactSubtitle ?? '').trim() || null,
+        contactEmail: (settings.contactEmail ?? '').trim() || null,
       };
       const res = await fetch(`${API}/settings`, {
         method: 'PATCH',
