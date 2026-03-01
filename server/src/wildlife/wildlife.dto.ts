@@ -6,7 +6,7 @@ export class CreateWildlifePhotoDto {
   title: string;
 
   @IsString()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   imageUrl: string;
 
   @IsOptional()
@@ -21,7 +21,7 @@ export class UpdateWildlifePhotoDto {
   title?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   imageUrl?: string;
 
   @IsOptional()
@@ -35,11 +35,11 @@ export class CreateWildlifeVideoDto {
   title: string;
 
   @IsString()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   embedUrl: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   thumbnailUrl?: string | null;
 }
 
@@ -50,10 +50,10 @@ export class UpdateWildlifeVideoDto {
   title?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   embedUrl?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   thumbnailUrl?: string | null;
 }

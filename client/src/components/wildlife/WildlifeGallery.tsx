@@ -5,6 +5,28 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { WildlifePhoto, WildlifeVideo } from '@/lib/api';
 
+/** Convert YouTube watch/short URLs to embed URL so iframe is allowed (X-Frame-Options). */
+function getEmbedUrl(embedUrl: string): string | null {
+  if (!embedUrl?.trim()) return null;
+  const u = embedUrl.trim();
+  // Already embed format
+  if (/youtube\.com\/embed\//i.test(u)) return u;
+  // watch?v=VIDEO_ID
+  const watchMatch = u.match(/(?:youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]+)/i);
+  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  // youtu.be/VIDEO_ID
+  const shortMatch = u.match(/(?:youtu\.be\/)([a-zA-Z0-9_-]+)/i);
+  if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
+  // Vimeo: already embed or player.vimeo.com
+  if (/vimeo\.com\/(?:video\/)?(\d+)/i.test(u)) {
+    const vimeoMatch = u.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  // Other URLs that look like embed URLs (e.g. player.vimeo.com)
+  if (/^(https?:)?\/\//i.test(u) && (u.includes('/embed/') || u.includes('player.'))) return u;
+  return null;
+}
+
 interface WildlifeGalleryProps {
   photos: WildlifePhoto[];
   videos: WildlifeVideo[];
@@ -61,22 +83,31 @@ export function WildlifeGallery({ photos, videos }: WildlifeGalleryProps) {
           <p className="mt-6 text-slate-500 dark:text-slate-400">Aucune vidéo pour le moment.</p>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
-            {videos.map((video) => (
+            {videos.map((video) => {
+              const embedSrc = getEmbedUrl(video.embedUrl);
+              return (
               <div
                 key={video.id}
                 className="overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-700"
               >
                 <div className="aspect-video">
-                  <iframe
-                    title={video.title}
-                    src={video.embedUrl}
-                    className="h-full w-full"
-                    allowFullScreen
-                  />
+                  {embedSrc ? (
+                    <iframe
+                      title={video.title}
+                      src={embedSrc}
+                      className="h-full w-full"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center p-4 text-center text-sm text-slate-600 dark:text-slate-400">
+                      URL invalide. Utilisez un lien d’intégration (ex. YouTube&nbsp;: <code className="text-xs">youtube.com/embed/...</code>).
+                    </div>
+                  )}
                 </div>
                 <p className="p-4 font-medium text-slate-900 dark:text-white">{video.title}</p>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
