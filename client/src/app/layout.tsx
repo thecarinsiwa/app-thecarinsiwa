@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     'Portfolio of Carin Siwa — Fullstack Developer, Graphic Designer, Wildlife Photographer & Videographer.',
   keywords: ['Carin Siwa', 'Fullstack Developer', 'Graphic Designer', 'Wildlife Photographer', 'Videographer'],
+  icons: { icon: '/favicon.svg' },
   openGraph: {
     title: 'Carin Siwa | Portfolio',
     description: 'Fullstack Developer, Graphic Designer, Wildlife Photographer & Videographer',

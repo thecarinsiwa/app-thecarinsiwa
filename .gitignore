@@ -29,3 +29,6 @@ Thumbs.db
 
 # MySQL data (if local)
 data/
+
+# Uploaded files (admin)
+server/uploads/
