@@ -1,15 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const socialLinks = [
-  { label: 'GitHub', href: 'https://github.com', icon: '↗' },
-  { label: 'LinkedIn', href: 'https://linkedin.com', icon: '↗' },
-  { label: 'Instagram', href: 'https://instagram.com', icon: '↗' },
-];
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+interface SocialLink {
+  label: string;
+  href: string;
+}
+
+interface SiteSettings {
+  socialLinks: SocialLink[];
+  contactSubtitle: string | null;
+  contactEmail: string | null;
+}
+
+const defaultSubtitle = 'Send a message or connect on social.';
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  useEffect(() => {
+    fetch(`${API}/settings`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data)
+          setSettings({
+            socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
+            contactSubtitle: data.contactSubtitle ?? null,
+            contactEmail: data.contactEmail ?? null,
+          });
+      })
+      .catch(() => setSettings(null));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -41,7 +65,7 @@ export default function ContactPage() {
         Contact
       </h1>
       <p className="mt-2 text-slate-600 dark:text-slate-300">
-        Send a message or connect on social.
+        {settings?.contactSubtitle || defaultSubtitle}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-10 space-y-6">
@@ -100,20 +124,34 @@ export default function ContactPage() {
 
       <div className="mt-12 border-t border-slate-200 pt-8 dark:border-slate-700">
         <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Social links</p>
-        <ul className="mt-3 flex flex-wrap gap-4">
-          {socialLinks.map((link) => (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent-green hover:underline dark:text-accent-green-light"
-              >
-                {link.label} {link.icon}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {(settings?.socialLinks?.length ?? 0) > 0 ? (
+          <ul className="mt-3 flex flex-wrap gap-4">
+            {(settings?.socialLinks ?? []).map((link) => (
+              <li key={link.label + link.href}>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent-green hover:underline dark:text-accent-green-light"
+                >
+                  {link.label} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            Aucun lien configuré. Ajoutez-en dans l’admin → Paramètres.
+          </p>
+        )}
+        {settings?.contactEmail && (
+          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+            Email :{' '}
+            <a href={`mailto:${settings.contactEmail}`} className="text-accent-green hover:underline dark:text-accent-green-light">
+              {settings.contactEmail}
+            </a>
+          </p>
+        )}
       </div>
     </div>
   );

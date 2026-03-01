@@ -10,6 +10,7 @@ const cards = [
   { href: '/admin/designs', title: 'Design', description: 'Galerie design (branding, social, print, UI).', icon: 'palette', countKey: 'designs' as const },
   { href: '/admin/wildlife', title: 'Wildlife', description: 'Photos et vidéos de la page Wildlife.', icon: 'camera', countKey: 'wildlife' as const },
   { href: '/admin/messages', title: 'Messages', description: 'Messages reçus via le formulaire de contact.', icon: 'mail', countKey: 'messages' as const },
+  { href: '/admin/settings', title: 'Paramètres site', description: 'Liens sociaux et texte de la page Contact.', icon: 'settings', countKey: 'settings' as const },
 ];
 
 const icons: Record<string, React.ReactNode> = {
@@ -33,6 +34,12 @@ const icons: Record<string, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
     </svg>
   ),
+  settings: (
+    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  ),
 };
 
 export function AdminDashboardClient() {
@@ -41,6 +48,7 @@ export function AdminDashboardClient() {
     designs: 0,
     wildlife: 0,
     messages: 0,
+    settings: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -53,9 +61,10 @@ export function AdminDashboardClient() {
         fetch(`${API}/wildlife/videos`, { credentials: 'include' }).then((r) => (r.ok ? r.json() : [])),
       ]).then(([p, v]) => p.length + v.length),
       fetch(`${API}/contact`, { credentials: 'include' }).then((r) => (r.ok ? r.json() : [])).then((arr) => arr.length),
+      fetch(`${API}/settings`, { credentials: 'include' }).then((r) => (r.ok ? 1 : 0)),
     ])
-      .then(([projects, designs, wildlife, messages]) =>
-        setCounts({ projects, designs, wildlife, messages })
+      .then(([projects, designs, wildlife, messages, settings]) =>
+        setCounts({ projects, designs, wildlife, messages, settings })
       )
       .catch(() => {})
       .finally(() => setLoading(false));
