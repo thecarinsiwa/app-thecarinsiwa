@@ -1,25 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Gallery, type GalleryItem } from '@/components/gallery/Gallery';
 
 const categories = ['All', 'Branding', 'Social Media', 'Print', 'UI'] as const;
-
-// Example data – replace with API later
-const designItems: (GalleryItem & { category: string })[] = [
-  { id: '1', title: 'Brand Identity', imageUrl: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop', category: 'Branding' },
-  { id: '2', title: 'Social Campaign', imageUrl: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=400&fit=crop', category: 'Social Media' },
-  { id: '3', title: 'Print Poster', imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=600&h=400&fit=crop', category: 'Print' },
-  { id: '4', title: 'App UI', imageUrl: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=600&h=400&fit=crop', category: 'UI' },
-  { id: '5', title: 'Logo Set', imageUrl: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=600&h=400&fit=crop', category: 'Branding' },
-  { id: '6', title: 'Instagram Stories', imageUrl: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=600&h=400&fit=crop', category: 'Social Media' },
-];
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function DesignPage() {
   const [filter, setFilter] = useState<string>('All');
-  const filtered = filter === 'All'
-    ? designItems
-    : designItems.filter((i) => i.category === filter);
+  const [items, setItems] = useState<(GalleryItem & { category: string })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const category = filter === 'All' ? undefined : filter;
+    const url = category ? `${API}/designs?category=${encodeURIComponent(category)}` : `${API}/designs`;
+    fetch(url)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setItems(data.map((d: { id: string; title: string; imageUrl: string; category: string }) => ({ id: d.id, title: d.title, imageUrl: d.imageUrl, category: d.category }))))
+      .finally(() => setLoading(false));
+  }, [filter]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-16">
@@ -45,9 +45,15 @@ export default function DesignPage() {
           </button>
         ))}
       </div>
-      <div className="mt-10">
-        <Gallery items={filtered} columns={3} />
-      </div>
+      {loading ? (
+        <p className="mt-10 text-slate-500 dark:text-slate-400">Chargement...</p>
+      ) : items.length === 0 ? (
+        <p className="mt-10 text-slate-500 dark:text-slate-400">Aucun design dans cette catégorie.</p>
+      ) : (
+        <div className="mt-10">
+          <Gallery items={items} columns={3} />
+        </div>
+      )}
     </div>
   );
 }

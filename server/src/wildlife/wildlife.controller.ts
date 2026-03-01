@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { WildlifeService } from './wildlife.service';
 import {
@@ -14,8 +15,10 @@ import {
   CreateWildlifeVideoDto,
   UpdateWildlifeVideoDto,
 } from './wildlife.dto';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('wildlife')
+@UseGuards(AdminGuard)
 export class WildlifeController {
   constructor(private readonly wildlifeService: WildlifeService) {}
 
