@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ContactModule } from './contact/contact.module';
 import { ProjectsModule } from './projects/projects.module';
+import { WildlifeModule } from './wildlife/wildlife.module';
 import { ContactMessage } from './contact/contact.entity';
 import { Project } from './projects/project.entity';
+import { WildlifePhoto } from './wildlife/wildlife-photo.entity';
+import { WildlifeVideo } from './wildlife/wildlife-video.entity';
 
 @Module({
   imports: [
@@ -14,11 +17,12 @@ import { Project } from './projects/project.entity';
       username: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_NAME || 'carin_portfolio',
-      entities: [ContactMessage, Project],
+      entities: [ContactMessage, Project, WildlifePhoto, WildlifeVideo],
       synchronize: process.env.NODE_ENV !== 'production',
     }),
     ContactModule,
     ProjectsModule,
+    WildlifeModule,
   ],
 })
 export class AppModule {}
