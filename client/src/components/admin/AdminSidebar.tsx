@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
+import { API_BASE_URL } from '@/lib/api';
 
 const links = [
   { href: '/admin', label: 'Tableau de bord', exact: true, icon: 'dashboard' },
@@ -100,7 +101,7 @@ export function AdminSidebar() {
           <button
               type="button"
               onClick={async () => {
-                await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/logout`, { method: 'POST', credentials: 'include' });
+                await fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
                 window.location.href = '/admin/login';
               }}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"

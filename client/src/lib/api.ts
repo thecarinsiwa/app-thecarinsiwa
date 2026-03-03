@@ -1,6 +1,9 @@
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+/** URL de base de l'API (définie dans .env.local : NEXT_PUBLIC_API_URL). */
+export const API_BASE_URL = getBaseUrl();
+
 export interface WildlifePhoto {
   id: string;
   title: string;

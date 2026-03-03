@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ProjectCard } from '@/components/development/ProjectCard';
 import type { ProjectCardData } from '@/components/development/ProjectCard.types';
+import { API_BASE_URL } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Development | Carin Siwa',
@@ -8,9 +9,8 @@ export const metadata: Metadata = {
 };
 
 async function getProjects(): Promise<ProjectCardData[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   try {
-    const res = await fetch(`${baseUrl}/projects`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE_URL}/projects`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data)

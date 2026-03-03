@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { fetchWildlifePhotos, fetchWildlifeVideos } from '@/lib/api';
 import { WildlifeGallery } from '@/components/wildlife/WildlifeGallery';
+import { API_BASE_URL } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Wildlife | Carin Siwa',
@@ -8,14 +9,13 @@ export const metadata: Metadata = {
 };
 
 export default async function WildlifePage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   let photos: Awaited<ReturnType<typeof fetchWildlifePhotos>> = [];
   let videos: Awaited<ReturnType<typeof fetchWildlifeVideos>> = [];
 
   try {
     const [photosRes, videosRes] = await Promise.all([
-      fetch(`${baseUrl}/wildlife/photos`, { next: { revalidate: 60 } }),
-      fetch(`${baseUrl}/wildlife/videos`, { next: { revalidate: 60 } }),
+      fetch(`${API_BASE_URL}/wildlife/photos`, { next: { revalidate: 60 } }),
+      fetch(`${API_BASE_URL}/wildlife/videos`, { next: { revalidate: 60 } }),
     ]);
     if (photosRes.ok) photos = await photosRes.json();
     if (videosRes.ok) videos = await videosRes.json();

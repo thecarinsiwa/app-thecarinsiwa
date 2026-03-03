@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_BASE_URL as API } from '@/lib/api';
 const profileImageUrl = `${API}/uploads/${encodeURIComponent('PassPhoto Without Chain.jpg')}`;
 
 const roles = [

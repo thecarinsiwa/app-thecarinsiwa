@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Gallery, type GalleryItem } from '@/components/gallery/Gallery';
+import { API_BASE_URL as API } from '@/lib/api';
 
 const categories = ['All', 'Branding', 'Social Media', 'Print', 'UI'] as const;
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function DesignPage() {
   const [filter, setFilter] = useState<string>('All');
