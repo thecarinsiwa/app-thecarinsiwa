@@ -40,40 +40,55 @@ export class AuthController {
     if (!code || !clientId || !clientSecret) {
       return res.redirect(`${FRONTEND_URL}/admin/login?error=callback`);
     }
-    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      }),
-    });
-    if (!tokenRes.ok) {
-      return res.redirect(`${FRONTEND_URL}/admin/login?error=token`);
+    try {
+      const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code,
+          client_id: clientId,
+          client_secret: clientSecret,
+          redirect_uri: redirectUri,
+          grant_type: 'authorization_code',
+        }),
+      });
+      const tokenText = await tokenRes.text();
+      if (!tokenRes.ok) {
+        console.error('[Auth] Google token error:', tokenRes.status, tokenText);
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=token`);
+      }
+      let tokens: { access_token?: string };
+      try {
+        tokens = JSON.parse(tokenText);
+      } catch {
+        console.error('[Auth] Google token response was not JSON:', tokenText.slice(0, 200));
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=token`);
+      }
+      const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      });
+      if (!userRes.ok) {
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=profile`);
+      }
+      const profile = await userRes.json();
+      const email = profile.email?.trim();
+      if (!email) {
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=email`);
+      }
+      if (!this.authService.isAllowedEmail(email)) {
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=unauthorized`);
+      }
+      const result = await this.authService.createOtpAndSendEmail(email);
+      if (!result) {
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=otp_send`);
+      }
+      return res.redirect(`${FRONTEND_URL}/admin/login?token=${encodeURIComponent(result.token)}&step=otp`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const stack = err instanceof Error ? err.stack : undefined;
+      console.error('[Auth] Google callback error:', msg, stack);
+      return res.redirect(`${FRONTEND_URL}/admin/login?error=server`);
     }
-    const tokens = await tokenRes.json();
-    const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
-    if (!userRes.ok) {
-      return res.redirect(`${FRONTEND_URL}/admin/login?error=profile`);
-    }
-    const profile = await userRes.json();
-    const email = profile.email?.trim();
-    if (!email) {
-      return res.redirect(`${FRONTEND_URL}/admin/login?error=email`);
-    }
-    if (!this.authService.isAllowedEmail(email)) {
-      return res.redirect(`${FRONTEND_URL}/admin/login?error=unauthorized`);
-    }
-    const result = await this.authService.createOtpAndSendEmail(email);
-    if (!result) {
-      return res.redirect(`${FRONTEND_URL}/admin/login?error=otp_send`);
-    }
-    return res.redirect(`${FRONTEND_URL}/admin/login?token=${encodeURIComponent(result.token)}&step=otp`);
   }
 
   @Post('verify-otp')

@@ -12,6 +12,7 @@ const errors: Record<string, string> = {
   email: 'Adresse email non fournie.',
   unauthorized: 'Cette adresse n’est pas autorisée à accéder à l’admin.',
   otp_send: 'Impossible d’envoyer le code par email.',
+  server: 'Erreur serveur lors de la connexion Google. Réessayez ou contactez l’administrateur.',
 };
 
 function LoginContent() {
