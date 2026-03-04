@@ -25,10 +25,11 @@ import { SiteSettings } from './settings/settings.entity';
       database: process.env.DB_NAME || 'carin_portfolio',
       entities: [ContactMessage, Project, WildlifePhoto, WildlifeVideo, Design, AdminOtp, SiteSettings],
       synchronize: process.env.NODE_ENV !== 'production',
-      // Aiven (et la plupart des MySQL cloud) exigent SSL en production
+      // Aiven (et la plupart des MySQL cloud) exigent SSL en production.
+      // rejectUnauthorized: false pour accepter le certificat Aiven (chaîne non reconnue par défaut).
       ssl:
         process.env.DB_SSL === 'true' || (process.env.DB_HOST && !process.env.DB_HOST.includes('localhost'))
-          ? { rejectUnauthorized: true }
+          ? { rejectUnauthorized: false }
           : false,
     }),
     ContactModule,
