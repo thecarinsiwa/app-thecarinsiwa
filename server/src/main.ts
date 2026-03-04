@@ -8,7 +8,9 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const origin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+  // CORS : l’origine doit correspondre exactement à celle envoyée par le navigateur (sans slash final).
+  const rawOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+  const origin = rawOrigin.replace(/\/+$/, '');
   app.enableCors({ origin, credentials: true });
   app.use(cookieParser());
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

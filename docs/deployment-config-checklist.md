@@ -29,7 +29,7 @@ La base MySQL est importée sur Aiven. Voici ce qui reste à configurer pour que
 | Variable        | Valeur |
 |-----------------|--------|
 | `API_URL`       | `https://app-thecarinsiwa-api.onrender.com` (URL de ton service Render) |
-| `CORS_ORIGIN`   | URL du front Vercel, ex. `https://ton-projet.vercel.app` |
+| `CORS_ORIGIN`   | URL du front Vercel, ex. `https://thecarinsiwa.vercel.app` (sans slash final) |
 | `FRONTEND_URL`  | Même URL Vercel que `CORS_ORIGIN` |
 
 **Auth admin**
