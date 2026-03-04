@@ -1,5 +1,11 @@
-const getBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'thecarinsiwa.vercel.app' || host.endsWith('.vercel.app'))
+      return 'https://app-thecarinsiwa-api.onrender.com';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+};
 
 /** URL de base de l'API (définie dans .env.local : NEXT_PUBLIC_API_URL). */
 export const API_BASE_URL = getBaseUrl();

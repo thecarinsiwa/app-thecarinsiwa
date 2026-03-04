@@ -113,6 +113,7 @@ export function Hero({ socialLinks = [] }: HeroProps) {
             className="object-cover"
             sizes="160px"
             priority
+            unoptimized
           />
         </motion.div>
         <motion.p
