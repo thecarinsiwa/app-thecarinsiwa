@@ -18,6 +18,8 @@ export class EmailService implements OnModuleInit {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
+        connectionTimeout: 15000,
+        greetingTimeout: 10000,
       });
     }
   }
