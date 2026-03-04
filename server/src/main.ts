@@ -19,6 +19,10 @@ async function bootstrap() {
     }),
   );
   const port = process.env.PORT || 3001;
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.get('/', (_req: express.Request, res: express.Response) => {
+    res.json({ ok: true, message: 'Carin Siwa API' });
+  });
   await app.listen(port, '0.0.0.0');
   console.log(`Server running at http://0.0.0.0:${port}`);
 }
