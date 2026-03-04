@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { API_BASE_URL as API } from '@/lib/api';
-const profileImageUrl = `${API}/uploads/${encodeURIComponent('PassPhoto Without Chain.jpg')}`;
+
+// Profile image: served from the app so the homepage doesn't depend on the API's ephemeral uploads.
+const profileImageUrl = '/images/profile.jpg';
 
 const roles = [
   'Fullstack Developer',
