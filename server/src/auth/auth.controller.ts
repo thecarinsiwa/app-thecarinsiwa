@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Req, Res, UseGuards } from '@nestjs/common
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { VerifyOtpDto, RequestOtpDto } from './auth.dto';
+import { VerifyOtpDto, RequestOtpDto, LoginDto } from './auth.dto';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const COOKIE_NAME = process.env.JWT_COOKIE_NAME || 'admin_token';
@@ -106,6 +106,25 @@ export class AuthController {
       return { success: false, message: 'Impossible d’envoyer le code. Réessayez plus tard.' };
     }
     return { success: true, token: result.token };
+  }
+
+  /** Connexion par identifiants (username + mot de passe) */
+  @Post('login')
+  async login(@Body() dto: LoginDto, @Res() res: Response) {
+    const user = await this.authService.validateCredentials(dto.username, dto.password);
+    if (!user) {
+      return res.status(401).json({ message: 'Identifiant ou mot de passe incorrect.' });
+    }
+    const access_token = this.authService.signAdminToken(user.email);
+    const isProd = process.env.NODE_ENV === 'production';
+    res.cookie(COOKIE_NAME, access_token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: COOKIE_MAX_AGE,
+      path: '/',
+    });
+    return res.json({ success: true });
   }
 
   @Post('verify-otp')

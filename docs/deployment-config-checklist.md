@@ -41,6 +41,14 @@ La base MySQL est importée sur Aiven. Voici ce qui reste à configurer pour que
 | `JWT_EXPIRES_IN` | `7d` |
 | `ADMIN_EMAILS`   | `thecarinsiwa@gmail.com` (ou plusieurs adresses séparées par des virgules) |
 
+**Connexion par identifiants (username / mot de passe)**
+
+| Variable             | Valeur |
+|----------------------|--------|
+| `ADMIN_USERNAME`     | `thecarinsiwa` |
+| `ADMIN_PASSWORD_HASH`| Hash bcrypt du mot de passe (générer avec : `node -e "console.log(require('bcrypt').hashSync('VOTRE_MOT_DE_PASSE', 10))"`) |
+| `ADMIN_EMAIL`        | Optionnel ; email utilisé dans le JWT (défaut : première valeur de `ADMIN_EMAILS`) |
+
 **Google OAuth**
 
 | Variable              | Valeur |

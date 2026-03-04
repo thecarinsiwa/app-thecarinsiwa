@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { AdminOtp } from './entities/admin-otp.entity';
 import { EmailService } from './email.service';
 
@@ -12,6 +13,11 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || DEFAULT_ADMIN_EMAIL)
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
+
+const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || 'thecarinsiwa').trim().toLowerCase();
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH?.trim();
+const ADMIN_EMAIL_FOR_PASSWORD_LOGIN =
+  process.env.ADMIN_EMAIL?.trim()?.toLowerCase() || ADMIN_EMAILS[0];
 
 @Injectable()
 export class AuthService {
@@ -24,6 +30,21 @@ export class AuthService {
 
   isAllowedEmail(email: string): boolean {
     return ADMIN_EMAILS.includes(email.trim().toLowerCase());
+  }
+
+  /**
+   * Valide username + mot de passe (connexion par identifiants).
+   * Retourne l'email à mettre dans le JWT si valide, sinon null.
+   */
+  async validateCredentials(username: string, password: string): Promise<{ email: string } | null> {
+    if (!ADMIN_PASSWORD_HASH) return null;
+    const u = username?.trim()?.toLowerCase();
+    if (!u || u !== ADMIN_USERNAME) return null;
+    const p = password?.trim();
+    if (!p) return null;
+    const ok = await bcrypt.compare(p, ADMIN_PASSWORD_HASH);
+    if (!ok) return null;
+    return { email: ADMIN_EMAIL_FOR_PASSWORD_LOGIN };
   }
 
   private generateOtp(): string {
@@ -69,5 +90,13 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  /** Génère un JWT admin (pour login par identifiants ou autre flux). */
+  signAdminToken(email: string): string {
+    const payload = { sub: email, email, type: 'admin' as const };
+    return this.jwtService.sign(payload, {
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    });
   }
 }

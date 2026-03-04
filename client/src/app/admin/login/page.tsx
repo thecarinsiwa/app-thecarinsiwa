@@ -31,6 +31,10 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   /** Afficher le formulaire email au lieu du choix Google/Email */
   const [showEmailForm, setShowEmailForm] = useState(false);
+  /** Afficher le formulaire identifiants (username / mot de passe) */
+  const [showCredentialsForm, setShowCredentialsForm] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const token = tokenFromUrl || otpToken;
   const isOtpStep = (step === 'otp' && token) || (!!otpToken && !!token);
@@ -99,6 +103,32 @@ function LoginContent() {
     }
   };
 
+  const handleCredentialsLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username.trim() || !password) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.message || 'Identifiant ou mot de passe incorrect.');
+        return;
+      }
+      router.replace('/admin');
+      router.refresh();
+    } catch {
+      setError('Erreur de connexion.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-slate-50 px-4 dark:bg-slate-900/30">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-lg dark:border-slate-700 dark:bg-slate-800">
@@ -111,7 +141,7 @@ function LoginContent() {
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
           {isOtpStep
             ? 'Entrez le code à 6 chiffres envoyé à votre adresse email.'
-            : 'Connectez-vous avec Google ou avec votre adresse email autorisée.'}
+            : 'Connectez-vous avec Google, par email ou avec vos identifiants.'}
         </p>
 
         {error && (
@@ -173,6 +203,47 @@ function LoginContent() {
               </button>
             </div>
           </form>
+        ) : showCredentialsForm ? (
+          <form onSubmit={handleCredentialsLogin} className="mt-6 space-y-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+              Identifiant
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="nom d'utilisateur"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              autoComplete="username"
+            />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+              Mot de passe
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              autoComplete="current-password"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => { setShowCredentialsForm(false); setError(''); setUsername(''); setPassword(''); }}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              >
+                Retour
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !username.trim() || !password}
+                className="flex-1 rounded-xl bg-accent-green py-3 font-medium text-white disabled:opacity-50 dark:bg-accent-green-light"
+              >
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </button>
+            </div>
+          </form>
         ) : (
           <div className="mt-6 space-y-3">
             <button
@@ -205,6 +276,24 @@ function LoginContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               Se connecter par email
+            </button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200 dark:border-slate-600" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">ou</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCredentialsForm(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-700"
+            >
+              <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+              Se connecter avec identifiants
             </button>
           </div>
         )}
