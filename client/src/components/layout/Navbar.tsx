@@ -74,6 +74,16 @@ export function Navbar() {
               </Link>
             </li>
           )}
+          {!isAdmin && (
+            <li>
+              <Link
+                href="/admin/login"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-accent-green hover:text-accent-green dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-accent-green-light dark:hover:text-accent-green-light"
+              >
+                Se connecter
+              </Link>
+            </li>
+          )}
           <li>
             <button
               type="button"
@@ -146,6 +156,17 @@ export function Navbar() {
                     className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
                   >
                     View site
+                  </Link>
+                </li>
+              )}
+              {!isAdmin && (
+                <li>
+                  <Link
+                    href="/admin/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="block rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    Se connecter
                   </Link>
                 </li>
               )}
