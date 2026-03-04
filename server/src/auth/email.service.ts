@@ -1,30 +1,45 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const DEFAULT_RESEND_FROM = 'Carin Siwa <onboarding@resend.dev>';
+const OTP_SUBJECT = 'Votre code d’accès admin - Carin Siwa';
 
 @Injectable()
 export class EmailService implements OnModuleInit {
   private transporter: nodemailer.Transporter | null = null;
+  private resend: Resend | null = null;
 
   constructor() {
-    const host = process.env.SMTP_HOST;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-    if (host && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
-        secure: process.env.SMTP_SECURE === 'true',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-        connectionTimeout: 15000,
-        greetingTimeout: 10000,
-      });
+    const resendKey = process.env.RESEND_API_KEY?.trim();
+    if (resendKey) {
+      this.resend = new Resend(resendKey);
+    }
+    if (!this.resend) {
+      const host = process.env.SMTP_HOST;
+      const user = process.env.SMTP_USER;
+      const pass = process.env.SMTP_PASS;
+      if (host && user && pass) {
+        this.transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587', 10),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+          connectionTimeout: 15000,
+          greetingTimeout: 10000,
+        });
+      }
     }
   }
 
   async onModuleInit() {
+    if (this.resend) {
+      console.log('[Email] Resend configuré – envoi des codes OTP activé');
+      return;
+    }
     if (!this.transporter) return;
     try {
       await this.transporter.verify();
@@ -40,19 +55,43 @@ export class EmailService implements OnModuleInit {
   }
 
   async sendOtp(to: string, otp: string): Promise<boolean> {
+    const html = this.getOtpEmailHtml(otp);
+    const text = `Carin Siwa – Connexion admin\n\nVotre code à 6 chiffres : ${otp}\n\nIl expire dans 15 minutes.\n\n— Carin Siwa`;
+
+    if (this.resend) {
+      const from = (process.env.EMAIL_FROM || DEFAULT_RESEND_FROM).trim();
+      try {
+        console.log('[Email] Sending OTP via Resend to', to);
+        const { error } = await this.resend.emails.send({
+          from,
+          to: [to],
+          subject: OTP_SUBJECT,
+          html,
+        });
+        if (error) {
+          console.error('[Email] Resend send failed:', error.message);
+          return false;
+        }
+        console.log('[Email] OTP sent successfully to', to);
+        return true;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('[Email] Resend send OTP failed:', msg);
+        return false;
+      }
+    }
+
     if (!this.transporter) {
       console.warn('SMTP not configured. OTP (for dev):', otp);
       return true;
     }
     const from = process.env.SMTP_FROM || process.env.SMTP_USER;
-    const html = this.getOtpEmailHtml(otp);
-    const text = `Carin Siwa – Connexion admin\n\nVotre code à 6 chiffres : ${otp}\n\nIl expire dans 15 minutes.\n\n— Carin Siwa`;
     try {
       console.log('[Email] Sending OTP to', to, 'from', from);
       await this.transporter.sendMail({
         from,
         to,
-        subject: 'Votre code d’accès admin - Carin Siwa',
+        subject: OTP_SUBJECT,
         text,
         html,
       });

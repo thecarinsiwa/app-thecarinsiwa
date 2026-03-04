@@ -51,6 +51,8 @@ La base MySQL est importée sur Aiven. Voici ce qui reste à configurer pour que
 
 **SMTP (code OTP par email)**
 
+Sur Render, la connexion SMTP (Gmail, etc.) peut être bloquée ou provoquer un timeout. Dans ce cas, utiliser l’option Resend ci-dessous.
+
 | Variable     | Exemple |
 |--------------|---------|
 | `SMTP_HOST`  | `smtp.gmail.com` |
@@ -59,6 +61,15 @@ La base MySQL est importée sur Aiven. Voici ce qui reste à configurer pour que
 | `SMTP_USER`  | Ton adresse Gmail |
 | `SMTP_PASS`  | Mot de passe d’application Gmail (voir `.env.example`) |
 | `SMTP_FROM`  | Optionnel, ex. même que `SMTP_USER` |
+
+**Option : Resend (recommandé pour Render)**
+
+Envoi par API HTTPS (pas de blocage réseau). Si `RESEND_API_KEY` est défini, il est utilisé en priorité à la place du SMTP.
+
+| Variable         | Valeur |
+|------------------|--------|
+| `RESEND_API_KEY` | Clé API créée sur [Resend → API Keys](https://resend.com/api-keys) |
+| `EMAIL_FROM`     | Optionnel. Ex. `Carin Siwa <onboarding@resend.dev>` (domaine test Resend), ou après [vérification d’un domaine](https://resend.com/domains) : `noreply@ton-domaine.com` |
 
 Ne pas définir `PORT` : Render l’injecte automatiquement.
 
@@ -109,7 +120,7 @@ Lancer le déploiement (ou laisser le premier déploiement se lancer). Chaque pu
 
 - **API** : ouvrir `https://ton-api.onrender.com` (ou ta URL) : tu dois avoir une réponse (même une 404 ou une page JSON), pas une erreur de connexion.
 - **Site** : ouvrir l’URL Vercel ; la page d’accueil doit se charger et les appels (projets, contact, etc.) doivent aller vers l’API Render.
-- **Admin** : aller sur `https://ton-site.vercel.app/admin`, se connecter avec Google ; le redirect doit aller vers l’API Render, puis recevoir le code OTP par email si SMTP est configuré.
+- **Admin** : aller sur `https://ton-site.vercel.app/admin`, se connecter avec Google ; le redirect doit aller vers l’API Render, puis recevoir le code OTP par email si Resend ou SMTP est configuré.
 
 ---
 

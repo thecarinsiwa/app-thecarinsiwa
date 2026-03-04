@@ -1,4 +1,9 @@
-import { IsString, Length, MinLength } from 'class-validator';
+import { IsString, Length, MinLength, IsEmail } from 'class-validator';
+
+export class RequestOtpDto {
+  @IsEmail()
+  email: string;
+}
 
 export class VerifyOtpDto {
   @IsString()

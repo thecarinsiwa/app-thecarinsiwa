@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Req, Res, UseGuards } from '@nestjs/common
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { VerifyOtpDto } from './auth.dto';
+import { VerifyOtpDto, RequestOtpDto } from './auth.dto';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const COOKIE_NAME = process.env.JWT_COOKIE_NAME || 'admin_token';
@@ -89,6 +89,23 @@ export class AuthController {
       console.error('[Auth] Google callback error:', msg, stack);
       return res.redirect(`${FRONTEND_URL}/admin/login?error=server`);
     }
+  }
+
+  /** Demande d'envoi d'un code OTP par email (sans passer par Google) */
+  @Post('request-otp')
+  async requestOtp(@Body() dto: RequestOtpDto) {
+    const email = dto.email?.trim()?.toLowerCase();
+    if (!email) {
+      return { success: false, message: 'Email invalide.' };
+    }
+    if (!this.authService.isAllowedEmail(email)) {
+      return { success: false, message: 'Cette adresse n’est pas autorisée.' };
+    }
+    const result = await this.authService.createOtpAndSendEmail(email);
+    if (!result) {
+      return { success: false, message: 'Impossible d’envoyer le code. Réessayez plus tard.' };
+    }
+    return { success: true, token: result.token };
   }
 
   @Post('verify-otp')
