@@ -26,6 +26,12 @@ npm run start:dev
 
 API: http://localhost:3001 (or port in `server/.env`).
 
+**Build + run (production locale):**
+```bash
+cd server
+npm run start:build
+```
+
 ### 3. Frontend
 
 ```bash
@@ -35,10 +41,13 @@ npm run dev
 ```
 
 Site: http://localhost:3000  
-Admin: http://localhost:3000/admin
+Admin: http://localhost:3000/admin (connexion Google + OTP requise).
 
-Site: http://localhost:3000  
-Admin: http://localhost:3000/admin (connexion Google + OTP requis)
+**Build + run (production locale):**
+```bash
+cd client
+npm run start:build
+```
 
 ## Admin – Connexion Google + OTP
 
